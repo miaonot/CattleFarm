@@ -170,7 +170,6 @@ public class MainFrame extends JFrame { // 主界面
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
 	}
 
 	private void delete() {
@@ -187,5 +186,4 @@ public class MainFrame extends JFrame { // 主界面
 									.getIdOfCattle());
 		}
 	}
-
 }
