@@ -6,6 +6,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import javax.swing.JOptionPane;
+
 public class HandleDB { // 操作数据库的语句
 
 	public static ResultSet rs;
@@ -49,12 +51,14 @@ public class HandleDB { // 操作数据库的语句
 			if (!conn.isClosed())
 				System.out.println("Succeeded connecting to the Database!");
 		} catch (ClassNotFoundException e) {
-
-			e.printStackTrace();
+			JOptionPane.showMessageDialog(null,"数据库连接失败");
+			System.exit(1);
+			//e.printStackTrace();
 
 		} catch (Exception e) {
-
-			e.printStackTrace();
+			JOptionPane.showMessageDialog(null,"数据库连接失败");
+			System.exit(1);
+			//e.printStackTrace();
 
 		}
 	}
@@ -101,12 +105,13 @@ public class HandleDB { // 操作数据库的语句
 	/**
 	 * 在数据库中插入数据
 	 */
-	public static String insertData(String tableName, String[] properties) {
-		String handleString = "INSERT　INTO " + tableName + " VALUES " + '(';
-		for (int i = 0; i < properties.length; i++) {
-			if (i != properties.length - 1) {
+	public static String insertData(String tableName, String[] properties){
+		String handleString = "INSERT INTO " + tableName + " VALUES " + '(';
+		for(int i=0; i<properties.length; i++){
+			if(i!=properties.length-1){
 				handleString = handleString + properties[i] + ',';
-			} else {
+			}
+			else{
 				handleString = handleString + properties[i];
 			}
 		}

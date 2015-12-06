@@ -16,7 +16,9 @@ import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
@@ -127,8 +129,54 @@ public class MainFrame extends JFrame { // 主界面
 		});
 		addButton.setBounds(140, 695, 80, 35);
 		addButton.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
-
+				String s=JOptionPane.showInputDialog("添加牛数(1~10)：");
+				int i= Integer.parseInt(s);
+				JPanel fpan = new JPanel(null);
+				JPanel pan = new JPanel();
+				pan.setSize(250, 100*(i+1));
+				JTextField [] field = new JTextField[i];
+				for(int j=0;j<i;j++){
+					field[j] = new JTextField(10);
+					pan.add(new JLabel("第"+(j+1) + "头牛ID："));
+					pan.add(field[j]);
+				}
+				
+				JButton okButton = new JButton("确定");
+				JButton cancelButton = new JButton("取消");
+				JPanel okOrCancel = new JPanel();
+				okOrCancel.add(okButton);
+				okOrCancel.add(cancelButton);
+				pan.add(okOrCancel);
+				fpan.add(pan);
+				
+				centerScrollPane.setViewportView(fpan);
+				
+				cancelButton.addActionListener(new ActionListener() {
+					
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						centerScrollPane.setViewportView(null);
+					}
+				});
+				okButton.addActionListener(new ActionListener() {
+					
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						int count = 0;
+						for(int k=0;k<i;k++)
+						{
+							if (!field[k].getText().equals("")){
+								String [] str= {"'"+field[k].getText()+"'",null,null,null,null,null,null,null,null,null};
+								HandleDB.updateDB(HandleDB.insertData("basis_cattle", str));
+								count++;
+							}
+						}
+						JOptionPane.showMessageDialog(null, count + "个添加成功，"+(i-count)+"个添加失败。");
+						centerScrollPane.setViewportView(null);
+					}
+				});
 			}
 		});
 		centerPanel.add(deleteButton);
