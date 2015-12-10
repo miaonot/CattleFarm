@@ -5,6 +5,10 @@ public class Cattle { // Å£µÄÊµÀı
 	private String idOfCattle;
 	private String feature;
 
+	public Cattle(){
+		this.feature = "";
+		this.idOfCattle = "";
+	}
 	public Cattle(String id, String feature) {
 		this.idOfCattle = id;
 		this.feature = feature;
