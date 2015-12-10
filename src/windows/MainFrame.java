@@ -23,6 +23,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
+import com.sun.org.apache.bcel.internal.generic.SWAP;
+
 import util.Cattle;
 import util.HandleDB;
 
@@ -123,7 +125,6 @@ public class MainFrame extends JFrame { // 主界面
 
 			public void actionPerformed(ActionEvent e) {
 				delete();
-				initListData();
 				cattleList.setSelectedIndex(0);
 			}
 		});
@@ -131,52 +132,8 @@ public class MainFrame extends JFrame { // 主界面
 		addButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				String s=JOptionPane.showInputDialog("添加牛数(1~10)：");
-				int i= Integer.parseInt(s);
-				JPanel fpan = new JPanel(null);
-				JPanel pan = new JPanel();
-				pan.setSize(250, 100*(i+1));
-				JTextField [] field = new JTextField[i];
-				for(int j=0;j<i;j++){
-					field[j] = new JTextField(10);
-					pan.add(new JLabel("第"+(j+1) + "头牛ID："));
-					pan.add(field[j]);
-				}
-				
-				JButton okButton = new JButton("确定");
-				JButton cancelButton = new JButton("取消");
-				JPanel okOrCancel = new JPanel();
-				okOrCancel.add(okButton);
-				okOrCancel.add(cancelButton);
-				pan.add(okOrCancel);
-				fpan.add(pan);
-				
-				centerScrollPane.setViewportView(fpan);
-				
-				cancelButton.addActionListener(new ActionListener() {
-					
-					@Override
-					public void actionPerformed(ActionEvent e) {
-						centerScrollPane.setViewportView(null);
-					}
-				});
-				okButton.addActionListener(new ActionListener() {
-					
-					@Override
-					public void actionPerformed(ActionEvent e) {
-						int count = 0;
-						for(int k=0;k<i;k++)
-						{
-							if (!field[k].getText().equals("")){
-								String [] str= {"'"+field[k].getText()+"'",null,null,null,null,null,null,null,null,null};
-								HandleDB.updateDB(HandleDB.insertData("basis_cattle", str));
-								count++;
-							}
-						}
-						JOptionPane.showMessageDialog(null, count + "个添加成功，"+(i-count)+"个添加失败。");
-						centerScrollPane.setViewportView(null);
-					}
-				});
+				add();
+				cattleList.setSelectedIndex(0);
 			}
 		});
 		centerPanel.add(deleteButton);
@@ -207,10 +164,10 @@ public class MainFrame extends JFrame { // 主界面
 		// 获取基本表
 		ResultSet rs = HandleDB.queryDB(HandleDB.SELECT_BASIS_CATTLE);
 		try {
-			System.out.println("this");
+			//System.out.println("this");
 			while (rs.next()) {
 				String id = rs.getString("idOfCattle");
-				System.out.println(id);
+				//System.out.println(id);
 				String features = rs.getString("feature");
 				Cattle cattle = new Cattle(id, features);
 				cattleVector.add(cattle);
@@ -220,6 +177,61 @@ public class MainFrame extends JFrame { // 主界面
 		}
 	}
 
+	
+	private void add(){
+		String s=JOptionPane.showInputDialog("添加牛数(1~10)：");
+		if (s!=null && Integer.parseInt(s) > 0 && Integer.parseInt(s) < 10){
+			int i= Integer.parseInt(s);
+			JPanel fpan = new JPanel(null);
+			JPanel pan = new JPanel();
+			pan.setSize(250, 100*(i+1));
+			JTextField [] field = new JTextField[i];
+			for(int j=0;j<i;j++){
+				field[j] = new JTextField(10);
+				pan.add(new JLabel("第"+(j+1) + "头牛ID："));
+				pan.add(field[j]);
+			}
+			
+			JButton okButton = new JButton("确定");
+			JButton cancelButton = new JButton("取消");
+			JPanel okOrCancel = new JPanel();
+			okOrCancel.add(okButton);
+			okOrCancel.add(cancelButton);
+			pan.add(okOrCancel);
+			fpan.add(pan);
+			
+			centerScrollPane.setViewportView(fpan);
+			
+			cancelButton.addActionListener(new ActionListener() {
+				
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					centerScrollPane.setViewportView(null);
+				}
+			});
+			okButton.addActionListener(new ActionListener() {
+				
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					int count = 0;
+					for(int k=0;k<i;k++)
+					{
+						if (!field[k].getText().equals("")){
+							String [] str= {"'"+field[k].getText()+"'",null,null,null,null,null,null,null,null,null};
+							HandleDB.updateDB(HandleDB.insertData("basis_cattle", str));
+							Cattle cattle = new Cattle(field[k].getText(), null);
+							cattleVector.add(cattle);
+							count++;
+						}
+					}
+					sort();
+					cattleList.setListData(cattleVector);
+					JOptionPane.showMessageDialog(null, count + "个添加成功，"+(i-count)+"个添加失败。");
+					centerScrollPane.setViewportView(null);
+				}
+			});
+		}
+	}
 	private void delete() {
 		int selectedCattle[] = cattleList.getSelectedIndices();
 		for (int counter = 0; counter < selectedCattle.length; counter++) {
@@ -227,11 +239,28 @@ public class MainFrame extends JFrame { // 主界面
 					"idOfCattle = "
 							+ cattleVector.get(selectedCattle[counter])
 									.getIdOfCattle()));
-			System.out
-					.println("delete:"
-							+ "idOfCattle = "
-							+ cattleVector.get(selectedCattle[counter])
-									.getIdOfCattle());
+			cattleVector.remove(selectedCattle[counter]);
+			for(int i=0;i<selectedCattle.length;i++){
+				selectedCattle[i]--;
+			}
+		}
+		cattleList.setListData(cattleVector);
+//			System.out
+//					.println("delete:"
+//							+ "idOfCattle = "
+//							+ cattleVector.get(selectedCattle[counter])
+//									.getIdOfCattle());
+	}
+	private void sort() {
+		for (int i=0;i<cattleVector.size()-1;i++){
+			for (int j=i;j<cattleVector.size();j++){
+				if (Integer.parseInt(cattleVector.get(i).getIdOfCattle()) > Integer.parseInt(cattleVector.get(j).getIdOfCattle())){
+					Cattle temp1 = cattleVector.get(i);
+					Cattle temp2 = cattleVector.get(j);
+					cattleVector.set(i, temp2);
+					cattleVector.set(j, temp1);
+				}
+			}
 		}
 	}
 }
